@@ -88,6 +88,22 @@ jobs:
       run: |
         go build -trimpath -ldflags="-w -s" -v
 
+    - name: Build snapshot bianries
+      uses: goreleaser/goreleaser-action@v1
+      if: ${{ runner.os }} == "ubuntu-latest"
+      with:
+        version: latest
+        args: build --snapshot
+      env:
+        TAG: ${{ steps.vars.outputs.short_sha }}
+
+    - name: Publish GoReleaser Artifacts
+      if: ${{ runner.os }} == "ubuntu-latest"
+      uses: actions/upload-artifact@v2
+      with:
+        name: caddy_v2_${{ runner.os }}_${{ steps.vars.outputs.short_sha }}
+        path: ${{ matrix.CADDY_BIN_PATH }}
+
     - name: Publish Build Artifact
       uses: actions/upload-artifact@v1
       with:
@@ -142,6 +158,6 @@ jobs:
       - uses: goreleaser/goreleaser-action@v1
         with:
           version: latest
-          args: check
+          args: build --snapshot
         env:
-          TAG: ${{ steps.vars.outputs.version_tag }}
+          TAG: ${{ steps.vars.outputs.short_sha }}
